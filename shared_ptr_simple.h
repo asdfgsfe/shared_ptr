@@ -11,25 +11,25 @@ class shared_ptr
     shared_ptr(const shared_ptr& other)
     {
         ptr_ = other.ptr_;
-        count_ = cother.count_;
-        ++(*count_);
+        //count_ = cother.count_;
+        //++(*count_);
         //fix 
-        //count_ = __sync_add_and_fetch(other.count_, 1);
+        count_ = __sync_add_and_fetch(other.count_, 1);
     }
 
     shared_ptr(shared_ptr&& other)
     {
-        ptr_ = other.ptr_;
+        //ptr_ = other.ptr_;
         //貌似有错误 移动构造为什么要++count_
-        count_ = other.count_;
-        ++(*count_);
-        if (--*(other.count_) == 0)
-        {
-            delete other_ptr_;
-            other.ptr_ = nullptr;
-            delete other.count_;
-            other.count_  = nullptr;
-        }
+        //count_ = other.count_;
+        //++(*count_);
+        //if (--*(other.count_) == 0)
+        //{
+            //delete other_ptr_;
+            //other.ptr_ = nullptr;
+            //delete other.count_;
+            //other.count_  = nullptr;
+        //}
         //正确的移动操作
         ptr_ = other.ptr_;
         count_ = __sync_fetch_and_add(other.count_, 0);
@@ -39,6 +39,10 @@ class shared_ptr
 
     shared_ptr& operator=(const shared_ptr& other)
     {
+        if (this == &other)
+        {
+          return *this;
+        }
         //应该直接调用析构函数 当前的析构函数
         ~shared_ptr();
         //--(*count_);
@@ -62,6 +66,10 @@ class shared_ptr
         //    delete ptr_;
         //    delete count_;
         //}
+        if (this == &other)
+        {
+          return *this;
+        }
         //改为直接调用析构函数
         ~shared_ptr();
         ptr_ = other.ptr_;
@@ -85,7 +93,8 @@ class shared_ptr
         //--(*count_);
         *count_ = __sync_sub_and_fetch(count_, 1);
         //原子比较
-        if (__sync_fetch_and_add(count_, 0) == 0)
+        //__sync_bool_caompare_and_swap(count_, 0) == true
+        if (__sync_bool_compare_and_swap(count_, 0))
         {
             delete ptr_;
             ptr_ = nullptr;
