@@ -16,6 +16,7 @@ public:
 	Test& operator=(const Test other)
 	{
 		std::cout << "Test& operator=(const Test other)" << std::endl;
+        return *this;
 	}
 	
 	Test(Test&& other)
@@ -26,6 +27,7 @@ public:
 	Test& operator=(Test&& other)
 	{
 		std::cout << "Test& operator=(Test&& other)" << std::endl;
+        return *this;
 	}
 
 	~Test()
